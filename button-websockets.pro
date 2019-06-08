@@ -12,12 +12,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-SOURCES += \
-        main.cpp \
-    websockets.cpp \
-    commandhandler.cpp
+HEADERS += websockets.h ProtoBufObject.pb.h \
+    brakehandler.h \
+    limhandler.h \
+    commandlogger.h
+
+SOURCES += main.cpp websockets.cpp ProtoBufObject.pb.cc \
+    brakehandler.cpp \
+    limhandler.cpp \
+    commandlogger.cpp
 
 RESOURCES += qml.qrc
+
+macx: INCLUDEPATH += /usr/local/Cellar/protobuf/3.6.1/include
+macx: LIBS += /usr/local/Cellar/protobuf/3.6.1/lib/libprotobuf.*
+
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
@@ -30,6 +39,3 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-HEADERS += \
-    websockets.h \
-    commandhandler.h

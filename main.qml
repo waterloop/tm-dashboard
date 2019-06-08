@@ -3,6 +3,9 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 import com.waterloop.websockets 1.0
+import com.waterloop.brakehandler 1.0
+import com.waterloop.limhandler 1.0
+import com.waterloop.commandLogger 1.0
 
 Window {
     visible: true
@@ -13,6 +16,18 @@ Window {
 
     Websockets {
         id: websockets
+    }
+
+    BrakeHandler {
+        id: brakeHandler
+    }
+
+    LIMHandler {
+        id: limhandler
+    }
+
+    CommandLogger {
+        id: commandLogger
     }
 
     RowLayout {
@@ -55,6 +70,10 @@ Window {
                         id: brakeButton
                         Layout.alignment: Qt.AlignHCenter
                         text: "Brake"
+
+                        onClicked: {
+                            brakeHandler.sendBrake(websockets, commandLogger)
+                        }
                     }
                     RowLayout {
                         Layout.alignment: Qt.AlignHCenter
@@ -65,10 +84,13 @@ Window {
 
                         Slider {
                             id: propulsionSlider
-                            snapMode: Slider.SnapOnRelease
+                            snapMode: Slider.SnapAlways
                             stepSize: 1
                             to: 100
 
+                            onPressedChanged: {
+                                limhandler.sendSpeed(websockets, commandLogger, value)
+                            }
                         }
                         TextArea {
                             text: propulsionSlider.value
@@ -81,6 +103,10 @@ Window {
                         font.pointSize: 60
                         Layout.alignment: Qt.AlignHCenter
                         text: "STOP"
+
+                        onClicked: {
+                            brakeHandler.sendBrake(websockets, commandLogger)
+                        }
                     }
                 }
             }
@@ -117,9 +143,9 @@ Window {
 
                         onClicked: {
                             if (websockets.isConnected) {
-                                websockets.closeClient()
+                                websockets.closeClient(commandLogger)
                             } else {
-                                websockets.connectClient(connectionAddress.text)
+                                websockets.connectClient(connectionAddress.text, commandLogger)
                             }
                         }
                     }
@@ -151,12 +177,11 @@ Window {
                         Layout.preferredHeight: parent.height
                         id: logsText
                         color: "white"
-                        text: qsTr("")
+                        text: commandLogger.log
                         wrapMode: Text.WordWrap
                     }
                     ScrollBar.vertical: ScrollBar {}
                 }
-
             }
         }
     }
